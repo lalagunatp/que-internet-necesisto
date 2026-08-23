@@ -10,8 +10,8 @@
 <meta property="og:title" content="¿Sabes qué internet necesitas? Descúbrelo aquí">
 <meta property="og:description" content="Responde 5 preguntas rápidas y descubre qué internet realmente necesitas. Totalplay, el internet que tú eliges.">
 <meta property="og:image" content="https://lalagunatp.github.io/que-internet-necesisto/og-image.jpg">
-<meta property="og:image:width" content="2048">
-<meta property="og:image:height" content="2048">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="1200">
 <meta property="og:url" content="https://lalagunatp.github.io/que-internet-necesisto/">
 <meta property="og:site_name" content="Totalplay">
 
@@ -317,6 +317,13 @@
     color: var(--green);
     line-height: 1;
   }
+
+  .score-ring.neutral {
+    border-color: var(--gold);
+    box-shadow: 0 0 40px rgba(245,197,24,.15);
+  }
+
+  .score-ring.neutral .score-num { color: var(--gold); }
 
   .score-ring .score-of {
     font-size: 11px;
@@ -637,36 +644,48 @@
 
 <!-- CONCLUSION -->
 <section class="conclusion" id="conclusion">
-  <div class="score-ring">
+  <div class="score-ring" id="scoreRing">
     <div class="score-num" id="scoreNum">0</div>
     <div class="score-of">de 5</div>
   </div>
-  <h2>Lo que pediste lo cumple un solo proveedor: <span class="brand">Totalplay</span></h2>
-  <p class="verdict">No te lo estamos vendiendo. Tú elegiste lo que quieres de tu internet — y solo hay uno en México que cumple todo junto: fibra real, velocidad comprobada, streaming incluido, atención rápida y conexión para toda la familia.</p>
 
-  <div class="badges">
-    <div class="badge">🏆 Ookla — 5 años #1 en velocidad</div>
-    <div class="badge">🏆 nPerf — 1er lugar general 2025</div>
-    <div class="badge">🛡️ Único con sello PROFECO Digital</div>
+  <!-- Default: matched at least one "premium" answer -->
+  <div id="conclusionMatch">
+    <h2>Lo que pediste lo cumple un solo proveedor: <span class="brand">Totalplay</span></h2>
+    <p class="verdict">No te lo estamos vendiendo. Tú elegiste lo que quieres de tu internet — y solo hay uno en México que cumple todo junto: fibra real, velocidad comprobada, streaming incluido, atención rápida y conexión para toda la familia.</p>
+
+    <div class="badges">
+      <div class="badge">🏆 Ookla — 5 años #1 en velocidad</div>
+      <div class="badge">🏆 nPerf — 1er lugar general 2025</div>
+      <div class="badge">🛡️ Único con sello PROFECO Digital</div>
+    </div>
+
+    <div class="stats">
+      <div class="st">
+        <div class="n">5.5M</div>
+        <div class="l">familias ya<br>lo eligieron</div>
+      </div>
+      <div class="st">
+        <div class="n">87</div>
+        <div class="l">ciudades con<br>cobertura</div>
+      </div>
+      <div class="st">
+        <div class="n">164K</div>
+        <div class="l">km de fibra<br>óptica</div>
+      </div>
+    </div>
+
+    <a href="https://www.totalplay.com.mx/paquetes" class="cta-final">Consulta tu cobertura →</a>
+    <div class="cta-sub">Pregunta por nuestros planes · Instalación sin costo</div>
   </div>
 
-  <div class="stats">
-    <div class="st">
-      <div class="n">5.5M</div>
-      <div class="l">familias ya<br>lo eligieron</div>
-    </div>
-    <div class="st">
-      <div class="n">87</div>
-      <div class="l">ciudades con<br>cobertura</div>
-    </div>
-    <div class="st">
-      <div class="n">164K</div>
-      <div class="l">km de fibra<br>óptica</div>
-    </div>
+  <!-- Alt: answered "no me importa" to everything -->
+  <div id="conclusionReflect" style="display:none;">
+    <h2>Está bien así — pero <span class="brand">mereces lo mejor</span></h2>
+    <p class="verdict">Nos dijiste que no te importa que la señal falle, esperar días para que te resuelvan, no saber si tu velocidad es real, pagar tu streaming aparte o que el internet no alcance para todos en casa. Quizá hoy no sea el momento de cambiar, y está bien. Pero tu conexión es parte de tu día a día — y "lo normal" no tiene por qué ser lo único disponible. Cuando quieras algo mejor, aquí va a estar Totalplay.</p>
+    <a href="https://www.totalplay.com.mx/paquetes" class="cta-final">Conoce tus opciones →</a>
+    <div class="cta-sub">Sin compromiso · Solo para cuando estés listo</div>
   </div>
-
-  <a href="https://www.totalplay.com.mx/paquetes" class="cta-final">Consulta tu cobertura →</a>
-  <div class="cta-sub">Pregunta por nuestros planes · Instalación sin costo</div>
 </section>
 
 <div class="foot">
@@ -675,6 +694,7 @@
 
 <script>
   let answered = 0;
+  let premiumCount = 0; // number of "a" (premium) answers picked
   const total = 5;
   let pendingNextId = null;
   let pendingTimer = null;
@@ -693,6 +713,7 @@
     // Show reveal only for option A
     if (choice === 'a') {
       reveal.classList.add('show');
+      premiumCount++;
     }
 
     // Count and update progress
@@ -716,6 +737,18 @@
 
     const nextEl = document.getElementById(nextId);
     if (nextId === 'conclusion') {
+      const matchEl = document.getElementById('conclusionMatch');
+      const reflectEl = document.getElementById('conclusionReflect');
+      const scoreRing = document.getElementById('scoreRing');
+      if (premiumCount === 0) {
+        matchEl.style.display = 'none';
+        reflectEl.style.display = 'block';
+        scoreRing.classList.add('neutral');
+      } else {
+        matchEl.style.display = 'block';
+        reflectEl.style.display = 'none';
+        scoreRing.classList.remove('neutral');
+      }
       nextEl.classList.add('visible');
       nextEl.scrollIntoView({ behavior: 'smooth' });
       setTimeout(() => animateScore(), 600);
@@ -730,8 +763,12 @@
 
   function animateScore() {
     const el = document.getElementById('scoreNum');
+    const target = premiumCount;
+    if (target === 0) {
+      el.textContent = '0';
+      return;
+    }
     let current = 0;
-    const target = answered;
     const interval = setInterval(() => {
       current++;
       el.textContent = current;
