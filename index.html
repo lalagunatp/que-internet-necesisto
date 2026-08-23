@@ -434,6 +434,42 @@
     margin: 0 auto;
   }
 
+  /* ===== NEXT (floating, minimal) ===== */
+  .next-float {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 100;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(10,22,40,.85);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(255,255,255,.15);
+    color: var(--white);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 10px 18px;
+    border-radius: 100px;
+    cursor: pointer;
+    opacity: 0;
+    transform: translateY(8px);
+    pointer-events: none;
+    transition: opacity .25s ease, transform .25s ease, border-color .2s;
+  }
+
+  .next-float.show {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .next-float:hover {
+    border-color: var(--sky);
+    background: rgba(0,180,216,.15);
+  }
+
   @media (max-width: 480px) {
     .stats { grid-template-columns: 1fr; max-width: 260px; }
     .badges { flex-direction: column; align-items: center; }
@@ -446,6 +482,7 @@
 <body>
 
 <div class="progress-bar" id="progressBar"></div>
+<button class="next-float" id="nextFloat" onclick="skipNext()">Siguiente →</button>
 
 <!-- HERO -->
 <section class="hero" id="hero">
@@ -639,6 +676,9 @@
 <script>
   let answered = 0;
   const total = 5;
+  let pendingNextId = null;
+  let pendingTimer = null;
+  const nextFloat = document.getElementById('nextFloat');
 
   function pick(q, choice) {
     const selBtn = document.getElementById('q' + q + choice);
@@ -660,20 +700,32 @@
     const pct = (answered / total) * 100;
     document.getElementById('progressBar').style.width = pct + '%';
 
-    // Auto-scroll to next after delay
-    setTimeout(() => {
-      const nextId = q < total ? 'q' + (q + 1) : 'conclusion';
-      const nextEl = document.getElementById(nextId);
+    // Queue auto-scroll, but let the user skip the wait with the next button
+    pendingNextId = q < total ? 'q' + (q + 1) : 'conclusion';
+    nextFloat.classList.add('show');
+    // More time when there's a reveal panel to read, less otherwise
+    pendingTimer = setTimeout(goToPendingNext, choice === 'a' ? 4200 : 1500);
+  }
 
-      if (nextId === 'conclusion') {
-        nextEl.classList.add('visible');
-        // Animate score counter
-        nextEl.scrollIntoView({ behavior: 'smooth' });
-        setTimeout(() => animateScore(), 600);
-      } else {
-        nextEl.scrollIntoView({ behavior: 'smooth' });
-      }
-    }, choice === 'a' ? 1800 : 800);
+  function goToPendingNext() {
+    clearTimeout(pendingTimer);
+    if (!pendingNextId) return;
+    const nextId = pendingNextId;
+    pendingNextId = null;
+    nextFloat.classList.remove('show');
+
+    const nextEl = document.getElementById(nextId);
+    if (nextId === 'conclusion') {
+      nextEl.classList.add('visible');
+      nextEl.scrollIntoView({ behavior: 'smooth' });
+      setTimeout(() => animateScore(), 600);
+    } else {
+      nextEl.scrollIntoView({ behavior: 'smooth' });
+    }
+  }
+
+  function skipNext() {
+    goToPendingNext();
   }
 
   function animateScore() {
