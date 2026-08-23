@@ -297,6 +297,13 @@
 
   .conclusion.visible { opacity: 1; }
 
+  #conclusionMatch, #conclusionReflect {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+
   .score-ring {
     width: 100px;
     height: 100px;
@@ -480,9 +487,9 @@
   @media (max-width: 480px) {
     .stats { grid-template-columns: 1fr; max-width: 260px; }
     .badges { flex-direction: column; align-items: center; }
-    .q-section { min-height: auto; padding: 72px 20px; }
-    .hero { min-height: auto; padding: 90px 20px 72px; }
-    .conclusion { min-height: auto; padding: 72px 20px; }
+    .q-section { padding: 72px 20px; }
+    .hero { padding: 90px 20px 72px; }
+    .conclusion { padding: 72px 20px; }
   }
 </style>
 </head>
@@ -675,7 +682,7 @@
       </div>
     </div>
 
-    <a href="https://www.totalplay.com.mx/paquetes" class="cta-final">Consulta tu cobertura →</a>
+    <a href="https://www.totalplay.com.mx/paquetes" class="cta-final" id="ctaMatch">Consulta tu cobertura →</a>
     <div class="cta-sub">Pregunta por nuestros planes · Instalación sin costo</div>
   </div>
 
@@ -683,7 +690,7 @@
   <div id="conclusionReflect" style="display:none;">
     <h2>Está bien así — pero <span class="brand">mereces lo mejor</span></h2>
     <p class="verdict">Nos dijiste que no te importa que la señal falle, esperar días para que te resuelvan, no saber si tu velocidad es real, pagar tu streaming aparte o que el internet no alcance para todos en casa. Quizá hoy no sea el momento de cambiar, y está bien. Pero tu conexión es parte de tu día a día — y "lo normal" no tiene por qué ser lo único disponible. Cuando quieras algo mejor, aquí va a estar Totalplay.</p>
-    <a href="https://www.totalplay.com.mx/paquetes" class="cta-final">Conoce tus opciones →</a>
+    <a href="https://www.totalplay.com.mx/paquetes" class="cta-final" id="ctaReflect">Conoce tus opciones →</a>
     <div class="cta-sub">Sin compromiso · Solo para cuando estés listo</div>
   </div>
 </section>
@@ -699,6 +706,28 @@
   let pendingNextId = null;
   let pendingTimer = null;
   const nextFloat = document.getElementById('nextFloat');
+
+  // If the link carries ?tel=<número del vendedor>, point the final CTA
+  // straight to WhatsApp with that vendor instead of la página genérica.
+  (function setupVendorCta() {
+    const params = new URLSearchParams(window.location.search);
+    const rawTel = params.get('tel');
+    if (!rawTel) return;
+    const tel = rawTel.replace(/[^0-9]/g, '');
+    if (tel.length < 10) return;
+
+    const links = [
+      { id: 'ctaMatch', msg: 'Hola, hice el test de "¿Qué internet necesito?" y quiero saber más sobre Totalplay.' },
+      { id: 'ctaReflect', msg: 'Hola, hice el test de Totalplay y me gustaría conocer mis opciones.' }
+    ];
+    links.forEach(({ id, msg }) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.href = 'https://wa.me/' + tel + '?text=' + encodeURIComponent(msg);
+      el.target = '_blank';
+      el.rel = 'noopener';
+    });
+  })();
 
   function pick(q, choice) {
     const selBtn = document.getElementById('q' + q + choice);
@@ -742,10 +771,10 @@
       const scoreRing = document.getElementById('scoreRing');
       if (premiumCount === 0) {
         matchEl.style.display = 'none';
-        reflectEl.style.display = 'block';
+        reflectEl.style.display = 'flex';
         scoreRing.classList.add('neutral');
       } else {
-        matchEl.style.display = 'block';
+        matchEl.style.display = 'flex';
         reflectEl.style.display = 'none';
         scoreRing.classList.remove('neutral');
       }
